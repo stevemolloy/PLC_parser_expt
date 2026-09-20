@@ -60,21 +60,7 @@ int is_not_space_or_paren(int x) {
   return !((x=='(') || (x==')') || isspace(x));
 }
 
-int main(void) {
-  const char *stmt =
-      "N_R3_VAC_PLC01_IP_RFD_S = 0 AND N_R3_VAC_PLC01_VGC_RFD_S = 0 AND "
-      "N_R3_WAT_PLC01_RFD_S = 0 AND N_R3_DIA_PLC01_RFD_S = 0 AND "
-      "N_R3_DIA_PLC01_LIB_RFD_S = 0 AND N_R3_VAC_PLC01_FEBEAM_RFD_S = 0 AND "
-      "N_R3_VAC_PLC01_COMMS_RFD_S = 0 AND N_R3_VAC_PLC01_OTHERS_RFD_S = 0 AND "
-      "(B_R3_VAC_PLC01_RFDMP_LOCAL_HB OR B_R3_VAC_FASTSCAN_RESET_HB)";
-
-  String_View stmt_sv = sv_from_cstr(stmt);
-  stmt_sv = sv_trim(stmt_sv);
-  if (stmt_sv.count <= 0) {
-    printf("ERROR: The string to parse is empty.");
-    return 1;
-  }
-
+Tokens lex_string_view(String_View stmt_sv) {
   Tokens tokens = {0};
   while (stmt_sv.count > 0) {
     Token next_token = {0};
@@ -90,6 +76,25 @@ int main(void) {
     
     stmt_sv = sv_trim(stmt_sv);
   }
+  return tokens;
+}
+
+int main(void) {
+  const char *stmt =
+      "N_R3_VAC_PLC01_IP_RFD_S = 0 AND N_R3_VAC_PLC01_VGC_RFD_S = 0 AND "
+      "N_R3_WAT_PLC01_RFD_S = 0 AND N_R3_DIA_PLC01_RFD_S = 0 AND "
+      "N_R3_DIA_PLC01_LIB_RFD_S = 0 AND N_R3_VAC_PLC01_FEBEAM_RFD_S = 0 AND "
+      "N_R3_VAC_PLC01_COMMS_RFD_S = 0 AND N_R3_VAC_PLC01_OTHERS_RFD_S = 0 AND "
+      "(B_R3_VAC_PLC01_RFDMP_LOCAL_HB OR B_R3_VAC_FASTSCAN_RESET_HB)";
+
+  String_View stmt_sv = sv_from_cstr(stmt);
+  stmt_sv = sv_trim(stmt_sv);
+  if (stmt_sv.count <= 0) {
+    printf("ERROR: The string to parse is empty.");
+    return 1;
+  }
+
+  Tokens tokens = lex_string_view(stmt_sv);
 
   da_foreach(Token, t, &tokens) {
     printf("Token: %s : \"" SV_Fmt "\"\n",
@@ -98,3 +103,4 @@ int main(void) {
   
   return 0;
 }
+
