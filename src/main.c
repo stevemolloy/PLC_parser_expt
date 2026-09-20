@@ -8,7 +8,7 @@
 typedef enum TokenType {
   TT_UNKNOWN = 0,
   TT_SIG,
-  TT_EQ,
+  TT_EQTEST,
   TT_AND,
   TT_OR,
   TT_BOOL,
@@ -20,7 +20,7 @@ const char *tokentype_text(TokenType ttype) {
   switch (ttype) {
   case TT_UNKNOWN:	return "TT_UNKNOWN";
   case TT_SIG:		return "TT_SIG";
-  case TT_EQ:		return "TT_EQ";
+  case TT_EQTEST:	return "TT_EQ";
   case TT_AND:		return "TT_AND";
   case TT_OR:		return "TT_OR";
   case TT_BOOL:		return "TT_BOOL";
@@ -45,7 +45,7 @@ typedef struct Tokens {
 TokenType classify_token(Token token) {
   String_View ttext = token.text;
   assert(ttext.count > 0);
-  if (sv_eq(ttext, sv_from_cstr("="))) return TT_EQ;
+  if (sv_eq(ttext, sv_from_cstr("="))) return TT_EQTEST;
   else if (sv_eq(ttext, sv_from_cstr("AND"))) return TT_AND;
   else if (sv_eq(ttext, sv_from_cstr("OR"))) return TT_OR;
   else if (sv_eq(ttext, sv_from_cstr("("))) return TT_OPAREN;
