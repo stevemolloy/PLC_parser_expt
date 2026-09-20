@@ -2,82 +2,49 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "lexer.h"
+
 #define NOB_IMPLEMENTATION
 #include "nob.h"
 
-typedef enum TokenType {
-  TT_UNKNOWN = 0,
-  TT_SIG,
-  TT_EQTEST,
-  TT_AND,
-  TT_OR,
-  TT_BOOL,
-  TT_OPAREN,
-  TT_CPAREN,
-} TokenType;
+typedef struct Node Node;
 
-const char *tokentype_text(TokenType ttype) {
-  switch (ttype) {
-  case TT_UNKNOWN:	return "TT_UNKNOWN";
-  case TT_SIG:		return "TT_SIG";
-  case TT_EQTEST:	return "TT_EQ";
-  case TT_AND:		return "TT_AND";
-  case TT_OR:		return "TT_OR";
-  case TT_BOOL:		return "TT_BOOL";
-  case TT_OPAREN:       return "TT_OPAREN";
-  case TT_CPAREN:       return "TT_CPAREN";
-  default:		return "ERROR: Mem corruption?";
-  }
-}
+typedef enum NodeType {
+  NT_SIGNAL,
+  NT_BOOL,
+  NT_BINOP,
+} NodeType;
 
-typedef struct Token {
-  String_View text;
-  TokenType ttype;
-} Token;
+typedef struct Signal { 
+  String_View name;
+} Signal;
 
-typedef struct Tokens {
-  Token *items;
-  size_t count;
-  size_t capacity;
-} Tokens;
+typedef struct Boolnode {
+  String_View name;
+  bool value;
+} Boolnode;
 
+typedef enum BinOpType {
+  BO_EQ,
+  BO_AND,
+  BO_OR,
+} BinOpType;
 
-TokenType classify_token(Token token) {
-  String_View ttext = token.text;
-  assert(ttext.count > 0);
-  if (sv_eq(ttext, sv_from_cstr("="))) return TT_EQTEST;
-  else if (sv_eq(ttext, sv_from_cstr("AND"))) return TT_AND;
-  else if (sv_eq(ttext, sv_from_cstr("OR"))) return TT_OR;
-  else if (sv_eq(ttext, sv_from_cstr("("))) return TT_OPAREN;
-  else if (sv_eq(ttext, sv_from_cstr(")"))) return TT_CPAREN;
-  else if (sv_eq(ttext, sv_from_cstr("0")) || sv_eq(ttext, sv_from_cstr("1")))
-    return TT_BOOL;
-  else if (ttext.data[0] == '(') return TT_OPAREN;
-  else return TT_SIG;
-}
+typedef struct BinOp {
+  String_View name;
+  BinOpType btype;
+  Node *lhs;
+  Node* rhs;
+} BinOp;
 
-int is_not_space_or_paren(int x) {
-  return !((x=='(') || (x==')') || isspace(x));
-}
-
-Tokens lex_string_view(String_View stmt_sv) {
-  Tokens tokens = {0};
-  while (stmt_sv.count > 0) {
-    Token next_token = {0};
-    if ((stmt_sv.data[0] == '(') || (stmt_sv.data[0] == ')')) {
-      next_token.text = sv_chop_left(&stmt_sv, 1);
-    }
-    else
-      next_token.text = nob_sv_chop_while(&stmt_sv, is_not_space_or_paren);
-
-    next_token.ttype = classify_token(next_token);
-
-    da_append(&tokens, next_token);
-    
-    stmt_sv = sv_trim(stmt_sv);
-  }
-  return tokens;
-}
+struct Node {
+  NodeType ntype;
+  union {
+    Signal signal;
+    Boolnode boolnode;
+    BinOp binop;
+  } as;
+};
 
 int main(void) {
   const char *stmt =
@@ -103,4 +70,3 @@ int main(void) {
   
   return 0;
 }
-
