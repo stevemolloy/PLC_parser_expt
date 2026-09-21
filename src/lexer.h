@@ -1,3 +1,6 @@
+#ifndef LEXER_H
+#define LEXER_H
+
 #include "nob.h"
 
 typedef enum TokenType {
@@ -26,3 +29,5 @@ const char *tokentype_text(TokenType ttype);
 TokenType classify_token(Token token);
 int is_not_space_or_paren(int x);
 Tokens lex_string_view(String_View stmt_sv);
+
+#endif
