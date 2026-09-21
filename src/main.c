@@ -20,7 +20,7 @@ typedef struct Signal {
 } Signal;
 
 typedef struct Boolnode {
-  String_View name;
+  String_View text;
   bool value;
 } Boolnode;
 
@@ -114,7 +114,7 @@ Node *parse_primary(Parser *p) {
   }
   case TT_BOOL: {
     Node *n = new_node(NT_BOOL);
-    n->as.boolnode.name = t->text;
+    n->as.boolnode.text = t->text;
     n->as.boolnode.value = sv_eq(t->text, sv_from_cstr("1"));
     return n;
   }
@@ -190,7 +190,7 @@ void print_node(Node *n, int depth) {
     printf("SIGNAL " SV_Fmt "\n", SV_Arg(n->as.signal.name));
     break;
   case NT_BOOL:
-    printf("BOOL " SV_Fmt "\n", SV_Arg(n->as.boolnode.name));
+    printf("BOOL " SV_Fmt "\n", SV_Arg(n->as.boolnode.text));
     break;
   case NT_BINOP:
     const char *names[] = {"AND", "OR", "EQ"};
@@ -217,11 +217,6 @@ int main(void) {
   }
 
   Tokens tokens = lex_string_view(stmt_sv);
-
-  // da_foreach(Token, t, &tokens) {
-  //   printf("Token: %s : \"" SV_Fmt "\"\n",
-  //          tokentype_text(t->ttype), SV_Arg(t->text));
-  // }
 
   Node *root = parse_statement(&tokens);
   if (root == NULL)
