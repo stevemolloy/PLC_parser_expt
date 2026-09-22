@@ -28,8 +28,10 @@ int main(void) {
   Node *root = parse_statement(&tokens);
   if (root == NULL)
     return 1;
-  
+
   print_node(root, 0);
+
+  free(tokens.items);
   
   return 0;
 }
